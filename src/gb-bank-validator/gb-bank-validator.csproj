@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <RootNamespace>GbBankValidator</RootNamespace>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <EmbeddedResource Include="..\data\valacdos.txt" LogicalName="valacdos.txt" />
+        <EmbeddedResource Include="..\data\scsubtab.txt" LogicalName="scsubtab.txt" />
+    </ItemGroup>
+
+</Project>

@@ -10,6 +10,14 @@ public static class ModulusChecks
     {
         if (digits == null || digits.Length != 14 || weights == null || weights.Length != 14)
             throw new ArgumentException("Need 14 digits and 14 weights");
+        return WeightedSum(digits.AsSpan(), weights.AsSpan(), method);
+    }
+
+    /// <summary>Fourteen digits: [u,v,w,x,y,z,a,b,c,d,e,f,g,h]. Weighted sum by method.</summary>
+    public static int WeightedSum(ReadOnlySpan<byte> digits, ReadOnlySpan<short> weights, ModulusMethod method)
+    {
+        if (digits.Length != 14 || weights.Length != 14)
+            throw new ArgumentException("Need 14 digits and 14 weights");
 
         var sum = 0;
         switch (method)
@@ -56,7 +64,13 @@ public static class ModulusChecks
     /// <summary>Run the modulus check: weighted sum then remainder. Returns (remainder, modulus).</summary>
     public static (int remainder, int modulus) RunCheck(byte[] digits, WeightRow row)
     {
-        var sum = WeightedSum(digits, row.Weights, row.Method);
+        return RunCheck(digits.AsSpan(), row);
+    }
+
+    /// <summary>Run the modulus check: weighted sum then remainder. Returns (remainder, modulus).</summary>
+    public static (int remainder, int modulus) RunCheck(ReadOnlySpan<byte> digits, WeightRow row)
+    {
+        var sum = WeightedSum(digits, row.Weights.AsSpan(), row.Method);
         var m = ModulusFor(row.Method);
         var remainder = ((sum % m) + m) % m;
         return (remainder, m);

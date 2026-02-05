@@ -1,4 +1,3 @@
-using GbBankValidator;
 using Xunit;
 
 namespace GbBankValidator.Tests;

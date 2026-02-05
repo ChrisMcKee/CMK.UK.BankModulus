@@ -16,80 +16,105 @@ public static class BankValidation
     public static byte[]? NormalizeSortCode(string s)
     {
         if (string.IsNullOrEmpty(s)) return null;
-        var digits = new List<byte>();
+        Span<byte> digits = stackalloc byte[6];
+        if (!TryNormalizeSortCode(s.AsSpan(), digits)) return null;
+        return digits.ToArray();
+    }
+
+    /// <summary>Try to normalise sort code into exactly 6 digits. Returns false if invalid.</summary>
+    private static bool TryNormalizeSortCode(ReadOnlySpan<char> s, Span<byte> digits)
+    {
+        if (digits.Length < 6) return false;
+        var count = 0;
         foreach (var c in s)
         {
             if (c == '-') continue;
-            if (digits.Count >= 6) return null;
-            if (!char.IsDigit(c)) return null;
-            digits.Add((byte)(c - '0'));
+            if (count >= 6) return false;
+            if (!char.IsDigit(c)) return false;
+            digits[count++] = (byte)(c - '0');
         }
-        return digits.Count == 6 ? digits.ToArray() : null;
+        return count == 6;
     }
 
     /// <summary>Normalise an account number: digits only, max 11. Returns null if invalid. Uses last 8 digits (left-padded if fewer).</summary>
     public static byte[]? NormalizeAccount(string s)
     {
         if (string.IsNullOrEmpty(s) || s.Length > 11) return null;
-        if (s.Any(c => !char.IsDigit(c))) return null;
-        var arr = new byte[8];
+        Span<byte> digits = stackalloc byte[8];
+        if (!TryNormalizeAccount(s.AsSpan(), digits)) return null;
+        return digits.ToArray();
+    }
+
+    /// <summary>Try to normalise an account number into exactly 8 digits (last 8, left-padded). Returns false if invalid.</summary>
+    private static bool TryNormalizeAccount(ReadOnlySpan<char> s, Span<byte> digits)
+    {
+        if (s.IsEmpty || s.Length > 11 || digits.Length < 8) return false;
+        for (var i = 0; i < s.Length; i++)
+            if (!char.IsDigit(s[i])) return false;
         if (s.Length >= 8)
         {
             var start = s.Length - 8;
             for (var i = 0; i < 8; i++)
-                arr[i] = (byte)(s[start + i] - '0');
+                digits[i] = (byte)(s[start + i] - '0');
         }
         else
         {
             var pad = 8 - s.Length;
+            for (var i = 0; i < pad; i++)
+                digits[i] = 0;
             for (var i = 0; i < s.Length; i++)
-                arr[pad + i] = (byte)(s[i] - '0');
+                digits[pad + i] = (byte)(s[i] - '0');
         }
-        return arr;
+        return true;
     }
 
-    /// <summary>Fourteen digits from sort code (6-digit) + account (8).</summary>
-    private static byte[] Digits14FromU32(uint sortCode, byte[] account8)
+    /// <summary>Write 14 digits from sort code + account (8 digits) into the given span.</summary>
+    private static void Digits14FromU32(uint sortCode, ReadOnlySpan<byte> account8, Span<byte> digits14)
     {
-        var d = new byte[14];
+        if (digits14.Length < 14 || account8.Length < 8) return;
+        var divisor = 100_000u;
         for (var i = 0; i < 6; i++)
         {
-            d[i] = (byte)(sortCode / (uint)Math.Pow(10, 5 - i) % 10);
+            digits14[i] = (byte)((sortCode / divisor) % 10);
+            divisor /= 10;
         }
-
         for (var i = 0; i < 8; i++)
-        {
-            d[6 + i] = account8[i];
-        }
-        return d;
+            digits14[6 + i] = account8[i];
     }
 
     /// <summary>Main validation: returns true if the account number is valid for the sort code.</summary>
     public static bool Validate(string sortCode, string accountNumber, Tables tables)
     {
-        var sortCodeNorm = NormalizeSortCode(sortCode);
-        if (sortCodeNorm == null) return false;
+        Span<byte> sortCodeDigits = stackalloc byte[6];
+        Span<byte> accountDigits = stackalloc byte[8];
+        if (!TryNormalizeSortCode(sortCode.AsSpan(), sortCodeDigits)) return false;
+        if (!TryNormalizeAccount(accountNumber.AsSpan(), accountDigits)) return false;
+        return ValidateCore(sortCodeDigits, accountDigits, tables);
+    }
 
-        var account8 = NormalizeAccount(accountNumber);
-        if (account8 == null) return false;
-
-        var sortCodeFromDigits = DataHelpers.SortCodeFromDigits(sortCodeNorm);
-        // Apply substitution (Exception 5 and flowchart: if in table, use substitute for checks).
+    private static bool ValidateCore(ReadOnlySpan<byte> sortCode6, ReadOnlySpan<byte> account8, Tables tables)
+    {
+        var sortCodeFromDigits = DataHelpers.SortCodeFromDigits(sortCode6);
         var checkSortCode = tables.Substitution.Substitute(sortCodeFromDigits);
 
         // EISCD: find weight rows for (substituted) sort code. If none, "cannot be checked" -> valid.
         var rows = tables.RowsForSortCode(checkSortCode).ToList();
         if (rows.Count == 0) return true;
 
-        // Build exception set  (indices 1..=14).
-        var hasEx = new bool[15];
+        Span<bool> hasEx = stackalloc bool[15];
         foreach (var r in rows)
         {
             if (r.Exception is >= 1 and <= 14)
                 hasEx[r.Exception.Value] = true;
         }
 
-        var digits = Digits14FromU32(checkSortCode, account8);
+        Span<byte> digits = stackalloc byte[14];
+        Digits14FromU32(checkSortCode, account8, digits);
+
+        // Exception 8: use sort code 090126 for check
+        Span<byte> digitsEx8Buf = stackalloc byte[14];
+        Digits14FromU32(90_126, account8, digitsEx8Buf);
+
         var (a, b, c, d, e, f, g, h) = (account8[0], account8[1], account8[2], account8[3], account8[4], account8[5], account8[6], account8[7]);
 
         // Exception 6: Foreign currency accounts
@@ -104,20 +129,18 @@ public static class BankValidation
         var firstRow = rows.Count > 0 ? rows[0] : null;
         var secondRow = rows.Count > 1 ? rows[1] : null;
 
-        // Exception 8: use sort code 090126 for check
-        var digitsEx8 = Digits14FromU32(90_126, account8);
-
         bool? firstPasses = firstRow != null
-            ? RunOneCheck(firstRow.Exception == 8 ? digitsEx8 : digits, firstRow, account8)
+            ? RunOneCheck(firstRow.Exception == 8 ? digitsEx8Buf : digits, firstRow, account8)
             : null;
         bool? secondPasses = secondRow != null
-            ? RunOneCheck(secondRow.Exception == 8 ? digitsEx8 : digits, secondRow, account8)
+            ? RunOneCheck(secondRow.Exception == 8 ? digitsEx8Buf : digits, secondRow, account8)
             : null;
 
         // Exception 3: if c is 6 or 9, the second check is ignored (only first counts).
         var ex3SkipSecond = hasEx[3] && (c == 6 || c == 9);
 
         // Exception 12/13: first check ex 12, second ex 13; either pass -> valid.
+        // ReSharper disable once InconsistentNaming
         var ex12_13 = hasEx[12] && hasEx[13];
         if (ex12_13)
         {
@@ -131,20 +154,20 @@ public static class BankValidation
         {
             if (firstPasses == true) return true;
             if (secondPasses == true) return true;
-            // When a≠0, second check uses alternative weights (Vocalink / RedBearSys).
+            // When a≠0, the second check uses alternative weights (Vocalink).
             if (a != 0)
             {
                 var altWeights = g == 9 ? Ex2And9_ANotZero_GIsNine_Weights : Ex2And9_ANotZero_GNotNine_Weights;
-                var sum = ModulusChecks.WeightedSum(digits, altWeights, ModulusMethod.Mod11);
+                var sum = ModulusChecks.WeightedSum(digits, altWeights.AsSpan(), ModulusMethod.Mod11);
                 var remainder = ((sum % 11) + 11) % 11;
                 if (remainder == 0) return true;
             }
             // Second check with sort code 309634: use the second weight row only with substituted digits.
             const uint subSc = 309634;
-            var subDigits = Digits14FromU32(subSc, account8);
-            if (secondRow != null && RunOneCheck(subDigits, secondRow, account8))
+            Span<byte> subDigitsBuf = stackalloc byte[14];
+            Digits14FromU32(subSc, account8, subDigitsBuf);
+            if (secondRow != null && RunOneCheck(subDigitsBuf, secondRow, account8))
                 return true;
-
             return false;
         }
 
@@ -153,10 +176,35 @@ public static class BankValidation
         {
             if (firstPasses == true) return true;
             if (h != 0 && h != 1 && h != 9) return false;
-            var modAccount = new byte[] { 0, a, b, c, d, e, f, g };
-            var modDigits = Digits14FromU32(checkSortCode, modAccount);
-            short[] ex14Weights = [0, 0, 0, 0, 0, 0, 8, 7, 6, 5, 4, 3, 2, 1];
-            var sum = modDigits.Zip(ex14Weights, (d, w) => (int)d * w).Sum();
+            Span<byte> modAccount = stackalloc byte[8];
+            modAccount[0] = 0;
+            modAccount[1] = a;
+            modAccount[2] = b;
+            modAccount[3] = c;
+            modAccount[4] = d;
+            modAccount[5] = e;
+            modAccount[6] = f;
+            modAccount[7] = g;
+            Span<byte> modDigits = stackalloc byte[14];
+            Digits14FromU32(checkSortCode, modAccount, modDigits);
+            Span<short> ex14Weights = stackalloc short[14];
+            ex14Weights[0] = 0;
+            ex14Weights[1] = 0;
+            ex14Weights[2] = 0;
+            ex14Weights[3] = 0;
+            ex14Weights[4] = 0;
+            ex14Weights[5] = 0;
+            ex14Weights[6] = 8;
+            ex14Weights[7] = 7;
+            ex14Weights[8] = 6;
+            ex14Weights[9] = 5;
+            ex14Weights[10] = 4;
+            ex14Weights[11] = 3;
+            ex14Weights[12] = 2;
+            ex14Weights[13] = 1;
+            var sum = 0;
+            for (var i = 0; i < 14; i++)
+                sum += modDigits[i] * ex14Weights[i];
             var remainder = ((sum % 11) + 11) % 11;
             return remainder == 0;
         }
@@ -185,11 +233,12 @@ public static class BankValidation
         return false;
     }
 
-    private static bool RunOneCheck(byte[] digits, WeightRow row, byte[] accountNo)
+    private static bool RunOneCheck(ReadOnlySpan<byte> digits, WeightRow row, ReadOnlySpan<byte> accountNo)
     {
         var (a, b, g, h) = (accountNo[0], accountNo[1], accountNo[6], accountNo[7]);
         var exception = row.Exception;
-        var weights = (short[])row.Weights.Clone();
+        Span<short> weights = stackalloc short[14];
+        row.Weights.AsSpan().CopyTo(weights);
 
         // Exception 7: if g=9, zeroize weighting positions u-b (first 8 weights).
         if (exception == 7 && g == 9)
@@ -223,7 +272,7 @@ public static class BankValidation
         return remainder == 0;
     }
 
-    private static bool ApplyException5(IReadOnlyList<WeightRow> rows, byte[] digits, byte[] accountNumber)
+    private static bool ApplyException5(IReadOnlyList<WeightRow> rows, ReadOnlySpan<byte> digits, ReadOnlySpan<byte> accountNumber)
     {
         var g = accountNumber[6];
         var h = accountNumber[7];

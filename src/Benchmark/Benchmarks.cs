@@ -1,21 +1,27 @@
-﻿using System;
-using BenchmarkDotNet;
-using BenchmarkDotNet.Attributes;
+﻿using BenchmarkDotNet.Attributes;
+using GbBankValidator;
+using ModulusChecking;
 
 namespace Benchmark
 {
+    [MemoryDiagnoser]
+    [KeepBenchmarkFiles]
     public class Benchmarks
     {
+        private const string SortCode = "012345";
+        private const string AccountNumber = "12345678";
+
         [Benchmark]
-        public void Scenario1()
+        public bool? ModulusChecker()
         {
-            // Implement your benchmark here
+            var modulusChecker = new ModulusChecker();
+            return modulusChecker.CheckBankAccount(SortCode,AccountNumber);
         }
 
         [Benchmark]
-        public void Scenario2()
+        public bool GbBankValidator()
         {
-            // Implement your benchmark here
+            return BankValidator.Validate(SortCode, AccountNumber);
         }
     }
 }

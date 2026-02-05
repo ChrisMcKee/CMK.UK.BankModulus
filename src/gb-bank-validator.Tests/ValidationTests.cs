@@ -6,7 +6,7 @@ namespace GbBankValidator.Tests;
 
 public class ValidationTests
 {
-    private static Data.Tables GetEmbeddedTables() => Data.Tables.FromEmbedded();
+    private static Tables GetEmbeddedTables() => Tables.FromEmbedded();
 
     [Fact]
     public void NormalizeSortCode()

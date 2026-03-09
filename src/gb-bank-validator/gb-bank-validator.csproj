@@ -2,11 +2,19 @@
 
     <PropertyGroup>
         <TargetFramework>net10.0</TargetFramework>
-        <RootNamespace>AspNet.GB.BankModulus</RootNamespace>
+        <RootNamespace>GbBankValidator</RootNamespace>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <PackageId>ChrisMcKee-GB-BankModulus-Validation</PackageId>
+        <AssemblyName>GB.BankModulus.Validation</AssemblyName>
+        <Title>GB BankModulus Validation</Title>
+        <Authors>GB-BankModulus-Validation</Authors>
+        <Copyright>2025 Chris McKee</Copyright>
+        <PackageTags>gb, bank, modulus, vocalink, valcados, sort-code, bank account validation</PackageTags>
+        <PackageProjectUrl>https://github.com/ChrisMcKee/GB.BankModulus</PackageProjectUrl>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     </PropertyGroup>
-<!--https://github.com/ChrisMcKee/AspNet.GB.BankModulus-->
+
     <ItemGroup>
         <EmbeddedResource Include="..\data\valacdos.txt" LogicalName="valacdos.txt" />
         <EmbeddedResource Include="..\data\scsubtab.txt" LogicalName="scsubtab.txt" />

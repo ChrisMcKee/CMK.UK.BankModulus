@@ -14,6 +14,7 @@
     <ItemGroup>
         <EmbeddedResource Include="..\data\valacdos.txt" LogicalName="valacdos.txt" />
         <EmbeddedResource Include="..\data\scsubtab.txt" LogicalName="scsubtab.txt" />
+        <InternalsVisibleTo Include="Tests" />
     </ItemGroup>
 
 </Project>

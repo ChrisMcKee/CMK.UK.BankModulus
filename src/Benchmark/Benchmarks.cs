@@ -13,7 +13,7 @@ namespace Benchmark
         private const string SortCode = "012345";
         private const string AccountNumber = "12345678";
 
-        [Benchmark]
+        [Benchmark(Baseline = true)]
         public bool? ModulusChecker()
         {
             var modulusChecker = new ModulusChecker();

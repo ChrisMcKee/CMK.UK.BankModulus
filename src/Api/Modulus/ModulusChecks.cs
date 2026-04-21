@@ -3,7 +3,7 @@ using CMK.UK.BankModulus.Data;
 namespace CMK.UK.BankModulus.Modulus;
 
 /// <summary>Modulus check implementations: MOD10, MOD11, Double Alternate (DBLAL).</summary>
-public static class ModulusChecks
+internal static class ModulusChecks
 {
     /// <summary>Fourteen digits: [u,v,w,x,y,z,a,b,c,d,e,f,g,h]. Weighted sum by method.</summary>
     public static int WeightedSum(byte[] digits, short[] weights, ModulusMethod method)

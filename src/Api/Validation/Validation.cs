@@ -1,7 +1,7 @@
-using GbBankValidator.Data;
-using GbBankValidator.Modulus;
+using CMK.UK.BankModulus.Data;
+using CMK.UK.BankModulus.Modulus;
 
-namespace GbBankValidator.Validation;
+namespace CMK.UK.BankModulus.Validation;
 
 /// <summary>Validation pipeline: normalize input, substitution, EISCD lookup, modulus checks, exceptions.</summary>
 public static class BankValidation

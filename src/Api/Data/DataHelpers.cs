@@ -1,4 +1,4 @@
-namespace GbBankValidator.Data;
+namespace CMK.UK.BankModulus.Data;
 
 /// <summary>Helpers for building sort code from digits. No validation.</summary>
 public static class DataHelpers

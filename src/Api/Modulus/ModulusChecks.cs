@@ -1,6 +1,6 @@
-using GbBankValidator.Data;
+using CMK.UK.BankModulus.Data;
 
-namespace GbBankValidator.Modulus;
+namespace CMK.UK.BankModulus.Modulus;
 
 /// <summary>Modulus check implementations: MOD10, MOD11, Double Alternate (DBLAL).</summary>
 public static class ModulusChecks

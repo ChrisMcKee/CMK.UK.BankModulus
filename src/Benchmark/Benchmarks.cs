@@ -1,5 +1,7 @@
 ﻿using BenchmarkDotNet.Attributes;
-using GbBankValidator;
+
+using CMK.UK.BankModulus;
+
 using ModulusChecking;
 
 namespace Benchmark

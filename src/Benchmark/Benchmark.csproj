@@ -13,11 +13,11 @@
         <IsPackable>false</IsPackable>
     </PropertyGroup>
     <ItemGroup>
-        <PackageReference Include="BenchmarkDotNet" Version="0.15.2"/>
-        <PackageReference Include="BenchmarkDotNet.Diagnostics.Windows" Version="0.15.2"/>
-        <PackageReference Include="RedBear.ModulusChecking" Version="2.0.0" />
+        <PackageReference Include="BenchmarkDotNet" />
+        <PackageReference Include="BenchmarkDotNet.Diagnostics.Windows" />
+        <PackageReference Include="RedBear.ModulusChecking" />
     </ItemGroup>
     <ItemGroup>
-      <ProjectReference Include="..\gb-bank-validator\gb-bank-validator.csproj" />
+      <ProjectReference Include="..\Api\Api.csproj" />
     </ItemGroup>
 </Project>

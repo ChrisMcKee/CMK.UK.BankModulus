@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <RootNamespace>CMK.UK.BankModulus</RootNamespace>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <PackageId>CMK.UK.BankModulus</PackageId>
+        <AssemblyName>CMK.UK.BankModulus</AssemblyName>
+        <Title>CMK GB BankModulus Validation</Title>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <EmbeddedResource Include="..\data\valacdos.txt" LogicalName="valacdos.txt" />
+        <EmbeddedResource Include="..\data\scsubtab.txt" LogicalName="scsubtab.txt" />
+    </ItemGroup>
+
+</Project>

@@ -1,10 +1,18 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "gb-bank-validator", "gb-bank-validator\gb-bank-validator.csproj", "{489C3EA5-7F20-4D47-AE66-ADBFCC8FAB2D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "gb-bank-validator", "src\Api\Api.csproj", "{489C3EA5-7F20-4D47-AE66-ADBFCC8FAB2D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "gb-bank-validator.Tests", "gb-bank-validator.Tests\gb-bank-validator.Tests.csproj", "{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "gb-bank-validator.Tests", "src\Tests\Tests.csproj", "{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Benchmark", "Benchmark\Benchmark.csproj", "{F4762109-5B01-4574-92E6-E0F8A8E217C9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Benchmark", "src\Benchmark\Benchmark.csproj", "{F4762109-5B01-4574-92E6-E0F8A8E217C9}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".sln", ".sln", "{74D90132-36EA-4DF1-AC13-44F6CF81F0DF}"
+	ProjectSection(SolutionItems) = preProject
+		Directory.Build.props = Directory.Build.props
+		Directory.Packages.props = Directory.Packages.props
+		README.md = README.md
+		build\common.props = build\common.props
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

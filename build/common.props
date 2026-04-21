@@ -1,0 +1,40 @@
+<Project>
+  <PropertyGroup>
+    <Product>.NET Library to provide modulus checking of bank account numbers against sort-codes based on VOCALINK Data</Product>
+    <Description>.NET Library to provide modulus checking of bank account numbers against sort-codes based on VOCALINK Data</Description>
+    <Copyright>Copyright 2025 Chris McKee</Copyright>
+    <NeutralLanguage>en-US</NeutralLanguage>
+    <Authors>Chris McKee</Authors>
+    <PackageTags>gb, bank, modulus, vocalink, valcados, sort-code, bank account validation</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+<!--    <PackageIconUrl></PackageIconUrl>-->
+<!--    <PackageIcon>Logo.png</PackageIcon>-->
+    <PackageProjectUrl>https://github.com/ChrisMcKee/CMK.GB.BankModulus</PackageProjectUrl>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/ChrisMcKee/CMK.GB.BankModulus</RepositoryUrl>
+    <PackageReleaseNotes>
+      https://github.com/ChrisMcKee/CMK.GB.BankModulus#readme
+    </PackageReleaseNotes>
+    <CLSCompliant>true</CLSCompliant>
+    <ComVisible>false</ComVisible>
+  </PropertyGroup>
+    <PropertyGroup>
+    <LangVersion>latest</LangVersion>
+    <Version>1.0.0-beta.1</Version>
+    <AssemblyVersionNumber>0.0.0</AssemblyVersionNumber>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyVersion>$(AssemblyVersionNumber)</AssemblyVersion>
+    <AssemblyFileVersion>$(AssemblyVersionNumber)</AssemblyFileVersion>
+    <InformationalVersion>$(Version)</InformationalVersion>
+    <PackageVersion>$(Version)</PackageVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+  <ItemGroup>
+<!--    <None Include="../../build/icon.png" Pack="true" Visible="false" PackagePath=""/>-->
+    <None Include="../../README.md" Pack="true" Visible="false" PackagePath=""/>
+  </ItemGroup>
+</Project>

@@ -9,12 +9,12 @@
     <PackageReadmeFile>README.md</PackageReadmeFile>
 <!--    <PackageIconUrl></PackageIconUrl>-->
 <!--    <PackageIcon>Logo.png</PackageIcon>-->
-    <PackageProjectUrl>https://github.com/ChrisMcKee/CMK.GB.BankModulus</PackageProjectUrl>
+    <PackageProjectUrl>https://github.com/ChrisMcKee/CMK.UK.BankModulus</PackageProjectUrl>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <RepositoryType>git</RepositoryType>
-    <RepositoryUrl>https://github.com/ChrisMcKee/CMK.GB.BankModulus</RepositoryUrl>
+    <RepositoryUrl>https://github.com/ChrisMcKee/CMK.UK.BankModulus</RepositoryUrl>
     <PackageReleaseNotes>
-      https://github.com/ChrisMcKee/CMK.GB.BankModulus#readme
+      https://github.com/ChrisMcKee/CMK.UK.BankModulus#readme
     </PackageReleaseNotes>
     <CLSCompliant>true</CLSCompliant>
     <ComVisible>false</ComVisible>

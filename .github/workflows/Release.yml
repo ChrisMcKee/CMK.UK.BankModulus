@@ -15,8 +15,44 @@ env:
   SIMPLYSIGN_URL: 'https://files.certum.eu/software/SimplySignDesktop/Windows/9.4.4.92/SimplySignDesktop-9.4.4.92-64-bit-en.msi'
 
 jobs:
+  verify_tag:
+    name: Verify tag is signed
+    runs-on: ubuntu-latest
+    outputs:
+      commit-sha: ${{ steps.verify.outputs.commit-sha }}
+
+    steps:
+      - name: Verify tag signature
+        id: verify
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG_NAME: ${{ github.ref_name }}
+        run: |
+          ref=$(gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/$TAG_NAME")
+
+          if [ "$(jq -r '.object.type' <<< "$ref")" != "tag" ]; then
+            echo "::error::Tag '$TAG_NAME' is a lightweight tag; create a signed annotated tag with 'git tag -s'"
+            exit 1
+          fi
+
+          tag=$(gh api "repos/$GITHUB_REPOSITORY/git/tags/$(jq -r '.object.sha' <<< "$ref")")
+
+          if [ "$(jq -r '.verification.verified' <<< "$tag")" != "true" ]; then
+            echo "::error::Tag '$TAG_NAME' signature is not verified ($(jq -r '.verification.reason' <<< "$tag"))"
+            exit 1
+          fi
+
+          if [ "$(jq -r '.object.type' <<< "$tag")" != "commit" ]; then
+            echo "::error::Tag '$TAG_NAME' does not point at a commit"
+            exit 1
+          fi
+
+          echo "Tag '$TAG_NAME' signed by $(jq -r '.tagger.name' <<< "$tag") - verified"
+          echo "commit-sha=$(jq -r '.object.sha' <<< "$tag")" >> "$GITHUB_OUTPUT"
+
   build_and_create_a_nuget:
     name: Build and create release NuGet package
+    needs: verify_tag
     runs-on: ubuntu-latest
 
     steps:
@@ -25,6 +61,8 @@ jobs:
 
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.verify_tag.outputs.commit-sha }}
 
       - name: Setup .NET
         uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0

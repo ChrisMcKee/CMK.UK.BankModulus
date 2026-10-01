@@ -12,6 +12,7 @@ on:
       - 'global.json'
 
 permissions:
+  contents: read
   packages: write
 
 env:
